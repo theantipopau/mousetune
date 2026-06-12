@@ -1,7 +1,7 @@
 # MouseTune
 
 <p align="center">
-  <img src="src/MouseTune.App/images/logo_header.png" alt="MouseTune" width="640">
+  <img src="src/MouseTune.App/images/logo_header_transparent.png" alt="MouseTune" width="640">
 </p>
 
 MouseTune is a portable Windows utility for inexpensive or generic Bluetooth mice that do not have their own manufacturer software. It focuses on two practical jobs:
@@ -12,7 +12,7 @@ MouseTune is a portable Windows utility for inexpensive or generic Bluetooth mic
 MouseTune is not a replacement for Logitech G HUB, Razer Synapse, Corsair iCUE, SteelSeries GG, or other vendor tools. It does not install drivers, run a service, use a tray process, contact the network, or require an account.
 
 <p align="center">
-  <img src="src/MouseTune.App/images/icon.PNG" alt="MouseTune icon" width="180">
+  <img src="src/MouseTune.App/images/icon_transparent.png" alt="MouseTune icon" width="180">
 </p>
 
 ## Current Features
@@ -29,7 +29,7 @@ MouseTune is not a replacement for Logitech G HUB, Razer Synapse, Corsair iCUE, 
 - System, light, and dark theme selection stored in portable settings.
 - Portable settings in `MouseTune.settings.json` beside the executable when writable, with `%LocalAppData%\MouseTunePortable\` fallback.
 - Atomic settings writes with one backup and corrupt JSON recovery.
-- Exportable local diagnostics JSON for troubleshooting device detection, saved settings, and recent MouseTune log entries.
+- Exportable local diagnostics JSON and clipboard summary for troubleshooting device detection and saved settings.
 - Self-contained single-file Windows x64 publish output named `MouseTune.exe`.
 
 ## What Effective DPI Means
@@ -119,6 +119,22 @@ The expected primary output is:
 ```text
 src/MouseTune.App/bin/Release/net8.0-windows/win-x64/publish/MouseTune.exe
 ```
+
+For a cleaner handoff folder with a zip and checksum:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\publish-portable.ps1
+```
+
+That writes:
+
+```text
+dist/MouseTune.exe
+dist/MouseTune-portable-win-x64.zip
+dist/MouseTune.exe.sha256.txt
+```
+
+The script uses `--no-restore` by default so it works after the normal `dotnet restore` / `dotnet build` flow without contacting NuGet again. Use `-Restore` if you explicitly want the script to restore during publish, or if a fresh machine does not already have restored assets.
 
 ## Project Layout
 

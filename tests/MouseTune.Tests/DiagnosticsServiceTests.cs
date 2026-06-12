@@ -56,6 +56,22 @@ public sealed class DiagnosticsServiceTests
         Assert.AreEqual("Office Mouse", report.SavedDevices[0].CustomAlias);
     }
 
+    [TestMethod]
+    public void SummaryIncludesCurrentPointerStateAndSavedAliases()
+    {
+        var paths = CreatePaths();
+        var service = new DiagnosticsService(paths, new AppLogger(paths));
+
+        var summary = service.CreateSummary(
+            CreateSettings(),
+            new PointerSettings(18, true, 6, 10, 1),
+            new[] { CreateDevice() });
+
+        StringAssert.Contains(summary, "MouseTune diagnostics summary");
+        StringAssert.Contains(summary, "Current Windows pointer speed: 18 / 20");
+        StringAssert.Contains(summary, "Office Mouse: 3000 effective DPI");
+    }
+
     private static PortableSettings CreateSettings() => new()
     {
         ApplicationVersion = "0.2.0",

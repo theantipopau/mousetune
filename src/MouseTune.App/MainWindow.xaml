@@ -32,17 +32,11 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Border Background="#05080D"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="8,5">
-                    <Image Source="images/logo_header.png"
-                           Width="238"
-                           Height="50"
-                           Stretch="Uniform"
-                           SnapsToDevicePixels="True" />
-                </Border>
+                <Image Source="images/logo_header_transparent.png"
+                       Width="246"
+                       Height="54"
+                       Stretch="Uniform"
+                       SnapsToDevicePixels="True" />
 
                 <StackPanel Grid.Column="1"
                             Margin="14,0"
@@ -93,7 +87,7 @@
                                 Padding="5"
                                 Width="58"
                                 Height="58">
-                            <Image Source="images/icon.PNG"
+                            <Image Source="images/icon_transparent.png"
                                    Stretch="Uniform" />
                         </Border>
 
@@ -249,6 +243,9 @@
                                     Command="{Binding RestoreWindowsDefaultsCommand}" />
                             <Button Content="Export diagnostics"
                                     Command="{Binding ExportDiagnosticsCommand}"
+                                    Margin="0,4,8,4" />
+                            <Button Content="Copy summary"
+                                    Command="{Binding CopyDiagnosticsSummaryCommand}"
                                     Margin="0,4,0,4" />
                         </WrapPanel>
                     </Grid>

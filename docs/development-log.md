@@ -56,6 +56,7 @@ Crash fix and UI polish:
 - Added persisted System/Light/Dark theme selection.
 - Added a visible reapply Windows name action for saved aliases that differ from the currently reported Windows name.
 - Reworked the main window toward a compact utility layout with clearer device, naming, sensitivity, recovery, and status/action areas.
+- Added transparent logo/icon PNG variants, a clipboard diagnostics summary, and a portable release helper script that creates a `dist` exe, zip, and checksum.
 - Published a fresh self-contained single-file `MouseTune.exe`.
 
 Validation completed in this pass:

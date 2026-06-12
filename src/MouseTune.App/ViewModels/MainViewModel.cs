@@ -33,6 +33,7 @@ public sealed class MainViewModel : ObservableObject
         RestorePreviousSettingsCommand = new AsyncRelayCommand(RestorePreviousSettingsAsync);
         RestoreWindowsDefaultsCommand = new AsyncRelayCommand(RestoreWindowsDefaultsAsync);
         ExportDiagnosticsCommand = new AsyncRelayCommand(ExportDiagnosticsAsync);
+        CopyDiagnosticsSummaryCommand = new RelayCommand(CopyDiagnosticsSummary);
         _ = InitializeAsync(CancellationToken.None);
     }
 
@@ -48,6 +49,7 @@ public sealed class MainViewModel : ObservableObject
     public ICommand RestorePreviousSettingsCommand { get; }
     public ICommand RestoreWindowsDefaultsCommand { get; }
     public ICommand ExportDiagnosticsCommand { get; }
+    public ICommand CopyDiagnosticsSummaryCommand { get; }
 
     public DeviceViewModel? SelectedDevice
     {
@@ -389,6 +391,23 @@ public sealed class MainViewModel : ObservableObject
             State = OperationState.Failed;
             StatusMessage = $"Diagnostics export failed: {ex.Message}";
             _services.Logger.Log("DiagnosticsExportFailed", "Diagnostics export failed.", ex);
+        }
+    }
+
+    private void CopyDiagnosticsSummary()
+    {
+        try
+        {
+            var summary = _services.Diagnostics.CreateSummary(_settings, _currentWindowsSettings, Devices.Select(device => device.Model));
+            Clipboard.SetText(summary);
+            State = OperationState.Successful;
+            StatusMessage = "Diagnostics summary copied to clipboard.";
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.ExternalException or InvalidOperationException)
+        {
+            State = OperationState.Failed;
+            StatusMessage = $"Could not copy diagnostics summary: {ex.Message}";
+            _services.Logger.Log("DiagnosticsCopyFailed", "Diagnostics copy failed.", ex);
         }
     }
 

@@ -18,7 +18,9 @@
   <ItemGroup>
     <Resource Include="images\icon.ico" />
     <Resource Include="images\icon.PNG" />
+    <Resource Include="images\icon_transparent.png" />
     <Resource Include="images\logo_header.png" />
+    <Resource Include="images\logo_header_transparent.png" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

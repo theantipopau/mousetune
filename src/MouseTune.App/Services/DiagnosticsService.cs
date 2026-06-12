@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using MouseTune.Models;
 
@@ -60,6 +61,39 @@ public sealed class DiagnosticsService
             DetectedDevices = detectedDevices.Select(DeviceDiagnostics.FromMouseDevice).ToList(),
             RecentLogLines = recentLogLines?.ToList() ?? new List<string>()
         };
+    }
+
+    public string CreateSummary(
+        PortableSettings settings,
+        PointerSettings currentWindowsSettings,
+        IEnumerable<MouseDevice> detectedDevices)
+    {
+        var devices = detectedDevices.ToList();
+        var builder = new StringBuilder();
+        builder.AppendLine("MouseTune diagnostics summary");
+        builder.AppendLine($"Version: {(settings.ApplicationVersion.Length > 0 ? settings.ApplicationVersion : GetVersion())}");
+        builder.AppendLine($"Windows: {Environment.OSVersion.VersionString}");
+        builder.AppendLine($"Portable storage: {Path.GetFileName(_paths.BasePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))}");
+        builder.AppendLine($"Current Windows pointer speed: {currentWindowsSettings.WindowsPointerSpeed} / 20");
+        builder.AppendLine($"Enhance pointer precision: {(currentWindowsSettings.EnhancePointerPrecision ? "On" : "Off")}");
+        builder.AppendLine($"Detected mouse devices: {devices.Count}");
+
+        foreach (var device in devices)
+        {
+            builder.AppendLine($"- {device.CurrentName} ({device.ConnectionType}, {(device.IsConnected ? "Connected" : "Disconnected")})");
+            builder.AppendLine($"  Windows name: {device.OriginalName}");
+            builder.AppendLine($"  VID/PID: {device.VendorId ?? "n/a"} / {device.ProductId ?? "n/a"}");
+            builder.AppendLine($"  Bluetooth address: {device.BluetoothAddress ?? "n/a"}");
+            builder.AppendLine($"  Stable ID: {device.StableId ?? "n/a"}");
+        }
+
+        builder.AppendLine($"Saved devices: {settings.SavedDevices.Count}");
+        foreach (var saved in settings.SavedDevices)
+        {
+            builder.AppendLine($"- {saved.CustomAlias}: {saved.EffectiveDpi} effective DPI, Windows speed {saved.WindowsPointerSpeed} / 20");
+        }
+
+        return builder.ToString().TrimEnd();
     }
 
     private IReadOnlyList<string> ReadRecentLogLines()

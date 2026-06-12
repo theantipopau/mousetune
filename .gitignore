@@ -5,6 +5,7 @@ obj/
 **/obj/
 artifacts/
 publish/
+dist/
 
 # User/local app state
 *.user
