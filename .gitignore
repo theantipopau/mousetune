@@ -1,0 +1,36 @@
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+artifacts/
+publish/
+
+# User/local app state
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# MouseTune portable runtime files
+MouseTune.settings.json
+MouseTune.settings.json.bak
+MouseTune.log
+MouseTune.diagnostics-*.json
+
+# Test and coverage output
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+packages/
+
+# OS noise
+Thumbs.db
+Desktop.ini
