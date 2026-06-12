@@ -51,6 +51,7 @@ public sealed class PortableSettingsService
     {
         SchemaVersion = 1,
         ApplicationVersion = GetVersion(),
+        Theme = AppTheme.System,
         LastModifiedUtc = DateTimeOffset.UtcNow,
         SavedDevices = new List<SavedMouseConfiguration>()
     };

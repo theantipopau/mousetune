@@ -19,11 +19,14 @@ MouseTune is not a replacement for Logitech G HUB, Razer Synapse, Corsair iCUE, 
 
 - Compact .NET 8 WPF app with MVVM separation.
 - Generic Bluetooth mouse discovery through Windows SetupAPI mouse interfaces.
-- Duplicate HID interface grouping using Container ID, Bluetooth address, VID/PID, and fallback device identifiers.
+- Duplicate HID interface grouping using Container ID, Bluetooth address, parent device ID, VID/PID, and fallback device identifiers.
+- Automatic refresh when Windows reports device changes, with the Refresh button still available for manual scans.
+- Single-instance guard so launching `MouseTune.exe` twice does not create competing app windows.
 - Local MouseTune alias that survives app and Windows restarts when the device can be matched again.
-- Guarded Windows friendly-name attempt through Configuration Manager where Windows permits it.
+- Guarded Windows friendly-name attempt through Configuration Manager where Windows permits it, plus a reapply action when Windows reports the detected name again.
 - Effective DPI input, presets, slider, mapped Windows pointer speed preview, and Enhance pointer precision toggle.
 - Verified `SystemParametersInfo` writes using `SPIF_UPDATEINIFILE` and `SPIF_SENDCHANGE`.
+- System, light, and dark theme selection stored in portable settings.
 - Portable settings in `MouseTune.settings.json` beside the executable when writable, with `%LocalAppData%\MouseTunePortable\` fallback.
 - Atomic settings writes with one backup and corrupt JSON recovery.
 - Exportable local diagnostics JSON for troubleshooting device detection, saved settings, and recent MouseTune log entries.
@@ -152,11 +155,9 @@ Manual validation is still required on a Windows machine with the target generic
 
 Good next improvements:
 
-- Capture parent Bluetooth device identity metadata to improve matching after reconnects.
-- Refresh devices automatically when Windows sends device-change notifications.
-- Add a visible "Reapply Windows name" action when Windows reports the original name but MouseTune has a saved alias.
-- Add system/light/dark theme switching using the existing theme dictionaries.
-- Add a single-instance guard so opening `MouseTune.exe` twice focuses the existing window.
+- Add explicit focus/bring-to-front behavior for the existing instance when a second launch is attempted.
+- Show richer device metadata in a compact expandable details panel.
+- Add a small in-app manual validation checklist for restart persistence testing.
 - Improve diagnostics with a copy-to-clipboard summary for support reports.
 - Add optional same-exe elevated rename mode only if real device testing proves it is needed.
 

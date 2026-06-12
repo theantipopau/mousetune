@@ -32,6 +32,12 @@ public static partial class ConfigurationManagerNative
         int bufferLen,
         uint ulFlags);
 
+    [DllImport("cfgmgr32.dll")]
+    public static extern uint CM_Get_Parent(
+        out uint pdnDevInst,
+        uint dnDevInst,
+        uint ulFlags);
+
     [DllImport("cfgmgr32.dll", CharSet = CharSet.Unicode)]
     public static extern uint CM_Locate_DevNode(
         out uint pdnDevInst,

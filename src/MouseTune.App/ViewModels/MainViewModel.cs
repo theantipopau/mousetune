@@ -19,6 +19,8 @@ public sealed class MainViewModel : ObservableObject
     private bool _enhancePointerPrecision;
     private OperationState _state = OperationState.Idle;
     private string _statusMessage = "Ready";
+    private AppTheme _selectedTheme = AppTheme.System;
+    private CancellationTokenSource? _deviceChangeRefreshCts;
 
     public MainViewModel(AppServices services)
     {
@@ -27,6 +29,7 @@ public sealed class MainViewModel : ObservableObject
         ApplyNameCommand = new AsyncRelayCommand(ApplyNameAsync, HasSelectedDevice);
         SaveAndApplyCommand = new AsyncRelayCommand(SaveAndApplyAsync, HasSelectedDevice);
         RestoreDetectedNameCommand = new AsyncRelayCommand(RestoreDetectedNameAsync, HasSelectedDevice);
+        ReapplyWindowsNameCommand = new AsyncRelayCommand(ReapplyWindowsNameAsync, HasSelectedDevice);
         RestorePreviousSettingsCommand = new AsyncRelayCommand(RestorePreviousSettingsAsync);
         RestoreWindowsDefaultsCommand = new AsyncRelayCommand(RestoreWindowsDefaultsAsync);
         ExportDiagnosticsCommand = new AsyncRelayCommand(ExportDiagnosticsAsync);
@@ -35,11 +38,13 @@ public sealed class MainViewModel : ObservableObject
 
     public ObservableCollection<DeviceViewModel> Devices { get; } = new();
     public IReadOnlyList<int> DpiPresets { get; } = new[] { 400, 800, 1200, 1600, 2400, 3000, 3200, 4800, 6400 };
+    public IReadOnlyList<AppTheme> ThemeOptions { get; } = new[] { AppTheme.System, AppTheme.Light, AppTheme.Dark };
 
     public ICommand RefreshCommand { get; }
     public ICommand ApplyNameCommand { get; }
     public ICommand SaveAndApplyCommand { get; }
     public ICommand RestoreDetectedNameCommand { get; }
+    public ICommand ReapplyWindowsNameCommand { get; }
     public ICommand RestorePreviousSettingsCommand { get; }
     public ICommand RestoreWindowsDefaultsCommand { get; }
     public ICommand ExportDiagnosticsCommand { get; }
@@ -100,6 +105,22 @@ public sealed class MainViewModel : ObservableObject
     public string ConnectionStatus => SelectedDevice?.ConnectionStatus ?? "Disconnected";
     public bool HasMultipleDevices => Devices.Count > 1;
     public bool HasDevice => SelectedDevice is not null;
+    public bool HasSavedAliasDrift =>
+        _selectedSavedConfiguration is not null
+        && SelectedDevice is not null
+        && !string.Equals(_selectedSavedConfiguration.CustomAlias, SelectedDevice.OriginalName, StringComparison.OrdinalIgnoreCase);
+
+    public AppTheme SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (SetProperty(ref _selectedTheme, value))
+            {
+                _ = SaveThemeAsync(value, CancellationToken.None);
+            }
+        }
+    }
 
     public string SettingsStateText
     {
@@ -137,6 +158,9 @@ public sealed class MainViewModel : ObservableObject
         try
         {
             _settings = await _services.PortableSettings.LoadAsync(cancellationToken).ConfigureAwait(true);
+            _selectedTheme = _settings.Theme;
+            _services.Theme.Apply(_settings.Theme);
+            OnPropertyChanged(nameof(SelectedTheme));
             _currentWindowsSettings = _services.PointerSettings.ReadCurrent();
             await _services.PortableSettings
                 .CaptureOriginalWindowsSettingsIfNeededAsync(_settings, _currentWindowsSettings, cancellationToken)
@@ -191,6 +215,27 @@ public sealed class MainViewModel : ObservableObject
             State = OperationState.Failed;
             StatusMessage = ex.Message;
             _services.Logger.Log("PortableRefreshFailed", "Portable refresh failed.", ex);
+        }
+    }
+
+    public void QueueDeviceChangeRefresh()
+    {
+        _deviceChangeRefreshCts?.Cancel();
+        _deviceChangeRefreshCts?.Dispose();
+        _deviceChangeRefreshCts = new CancellationTokenSource();
+        _ = RefreshAfterDeviceChangeAsync(_deviceChangeRefreshCts.Token);
+    }
+
+    private async Task RefreshAfterDeviceChangeAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            StatusMessage = "Device change detected. Refreshing...";
+            await Task.Delay(600, cancellationToken).ConfigureAwait(true);
+            await RefreshAsync(cancellationToken).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
         }
     }
 
@@ -279,6 +324,18 @@ public sealed class MainViewModel : ObservableObject
         RefreshComputedProperties();
     }
 
+    private async Task ReapplyWindowsNameAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedDevice is null)
+        {
+            return;
+        }
+
+        var alias = _selectedSavedConfiguration?.CustomAlias ?? CustomName;
+        CustomName = alias;
+        await ApplyNameAsync(cancellationToken).ConfigureAwait(true);
+    }
+
     private Task RestorePreviousSettingsAsync(CancellationToken cancellationToken)
     {
         if (!ConfirmRestore("Restore the Windows mouse settings captured before MouseTune first changed them?"))
@@ -332,6 +389,23 @@ public sealed class MainViewModel : ObservableObject
             State = OperationState.Failed;
             StatusMessage = $"Diagnostics export failed: {ex.Message}";
             _services.Logger.Log("DiagnosticsExportFailed", "Diagnostics export failed.", ex);
+        }
+    }
+
+    private async Task SaveThemeAsync(AppTheme theme, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _settings.Theme = theme;
+            _services.Theme.Apply(theme);
+            await _services.PortableSettings.SaveAsync(_settings, cancellationToken).ConfigureAwait(true);
+            StatusMessage = $"Theme set to {theme}.";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            State = OperationState.Failed;
+            StatusMessage = $"Theme could not be saved: {ex.Message}";
+            _services.Logger.Log("ThemeSaveFailed", "Theme save failed.", ex);
         }
     }
 
@@ -422,6 +496,7 @@ public sealed class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ConnectionStatus));
         OnPropertyChanged(nameof(HasMultipleDevices));
         OnPropertyChanged(nameof(HasDevice));
+        OnPropertyChanged(nameof(HasSavedAliasDrift));
         OnPropertyChanged(nameof(SettingsStateText));
     }
 
@@ -430,6 +505,7 @@ public sealed class MainViewModel : ObservableObject
         (ApplyNameCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
         (SaveAndApplyCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
         (RestoreDetectedNameCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
+        (ReapplyWindowsNameCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
     }
 
     private static bool ConfirmRestore(string message) =>

@@ -28,6 +28,7 @@ The settings file contains:
 - effective DPI values;
 - Windows pointer-speed values;
 - Enhance pointer precision state;
+- selected theme;
 - last modified date.
 
 Writes are atomic: MouseTune writes a temporary JSON file, validates it by deserializing it, keeps one `.bak` copy, then replaces the active settings file. Missing or malformed settings files recover to a clean default.

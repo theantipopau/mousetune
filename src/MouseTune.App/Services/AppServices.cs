@@ -10,7 +10,8 @@ public sealed class AppServices
         MouseDeviceDiscoveryService discovery,
         DeviceRenameService rename,
         PointerSettingsService pointerSettings,
-        DiagnosticsService diagnostics)
+        DiagnosticsService diagnostics,
+        ThemeService theme)
     {
         Paths = paths;
         Logger = logger;
@@ -20,6 +21,7 @@ public sealed class AppServices
         Rename = rename;
         PointerSettings = pointerSettings;
         Diagnostics = diagnostics;
+        Theme = theme;
     }
 
     public AppPaths Paths { get; }
@@ -30,6 +32,7 @@ public sealed class AppServices
     public DeviceRenameService Rename { get; }
     public PointerSettingsService PointerSettings { get; }
     public DiagnosticsService Diagnostics { get; }
+    public ThemeService Theme { get; }
 
     public static AppServices CreateDefault()
     {
@@ -43,6 +46,7 @@ public sealed class AppServices
         var rename = new DeviceRenameService(logger);
         var pointer = new PointerSettingsService(new WindowsPointerSettingsNative(), logger);
         var diagnostics = new DiagnosticsService(paths, logger);
+        var theme = new ThemeService();
         return new AppServices(
             paths,
             logger,
@@ -51,6 +55,7 @@ public sealed class AppServices
             discovery,
             rename,
             pointer,
-            diagnostics);
+            diagnostics,
+            theme);
     }
 }

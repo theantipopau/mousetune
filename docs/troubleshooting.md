@@ -2,7 +2,7 @@
 
 ## No Mouse Devices Appear
 
-Use the Refresh button. MouseTune currently focuses on generic Bluetooth-style mice and filters obvious virtual devices.
+MouseTune refreshes automatically when Windows reports device changes. You can also use the Refresh button. MouseTune currently focuses on generic Bluetooth-style mice and filters obvious virtual devices.
 
 ## Name Does Not Change Everywhere
 

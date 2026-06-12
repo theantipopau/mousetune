@@ -121,6 +121,7 @@ public sealed class MouseDeviceDiscoveryService
                 ?? "Mouse";
             var manufacturer = GetRegistryProperty(set, ref devInfo, NativeConstants.SpdrpMfg);
             var containerId = GetGuidProperty(set, ref devInfo, ConfigurationManagerNative.DevpkeyDeviceContainerId)?.ToString("D");
+            var parentDeviceInstanceId = GetParentDeviceInstanceId(devInfo.DevInst);
             var bluetoothAddress = BluetoothNative.ExtractBluetoothAddress(instanceId) ?? BluetoothNative.ExtractBluetoothAddress(interfacePath);
             var vendorId = MatchValue(VidRegex, instanceId) ?? MatchValue(VidRegex, interfacePath);
             var productId = MatchValue(PidRegex, instanceId) ?? MatchValue(PidRegex, interfacePath);
@@ -130,6 +131,7 @@ public sealed class MouseDeviceDiscoveryService
                 DeviceInstanceId = instanceId,
                 InterfacePath = interfacePath,
                 ContainerId = containerId,
+                ParentDeviceInstanceId = parentDeviceInstanceId,
                 SerialNumber = DeviceIdentityService.ExtractSerialNumber(instanceId),
                 CurrentName = friendlyName,
                 OriginalName = friendlyName,
@@ -160,6 +162,12 @@ public sealed class MouseDeviceDiscoveryService
         }
 
         return new string(buffer).TrimEnd('\0');
+    }
+
+    private static string? GetParentDeviceInstanceId(uint devInst)
+    {
+        var result = ConfigurationManagerNative.CM_Get_Parent(out var parentDevInst, devInst, 0);
+        return result == NativeConstants.CrSuccess ? GetDeviceInstanceId(parentDevInst) : null;
     }
 
     private static string? GetRegistryProperty(SafeDeviceInfoSetHandle set, ref SetupApiNative.SpDevinfoData devInfo, int property)

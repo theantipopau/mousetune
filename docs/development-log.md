@@ -50,6 +50,12 @@ Crash fix and UI polish:
 - Broadened startup/refresh exception handling so device-enumeration failures surface as app status instead of terminating the process.
 - Refreshed the compact UI with a softer blue/teal palette, Segoe UI Variable font usage, rounded button/input templates, status pill styling, and clearer sensitivity summary treatment.
 - Added bundled logo/icon assets to the WPF app and updated the README with branding, portable usage, validation, and roadmap details.
+- Added parent device instance ID capture during mouse discovery to improve saved-device matching after Bluetooth reconnects.
+- Added automatic debounced refresh when Windows broadcasts device-node changes.
+- Added a single-instance guard for the portable executable.
+- Added persisted System/Light/Dark theme selection.
+- Added a visible reapply Windows name action for saved aliases that differ from the currently reported Windows name.
+- Reworked the main window toward a compact utility layout with clearer device, naming, sensitivity, recovery, and status/action areas.
 - Published a fresh self-contained single-file `MouseTune.exe`.
 
 Validation completed in this pass:

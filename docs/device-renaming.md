@@ -18,6 +18,8 @@ Windows did not permit this Bluetooth device name to be changed. The alias has s
 
 MouseTune changes the name displayed by this Windows computer where Windows permits it. It does not rewrite the Bluetooth name stored in the mouse firmware.
 
+If Windows later reports the original detected name while MouseTune has a saved alias, the app keeps the MouseTune alias and shows a compact Reapply Windows name action.
+
 Alias validation:
 
 - trims whitespace;
